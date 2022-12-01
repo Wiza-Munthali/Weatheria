@@ -1,9 +1,15 @@
+import 'dart:async';
+
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:weather_icons/weather_icons.dart';
 import 'package:weatheria/models/weather.dart';
 import 'package:weatheria/models/weatherConditions.dart';
+import 'package:weatheria/reusable/temp_chart.dart';
+import 'package:weatheria/screens/next_seven.dart';
 
 class Home extends StatefulWidget {
   final Weather weather;
@@ -24,217 +30,200 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   WeatherConditions weatherConditions = new WeatherConditions();
   late Weather _weather;
   late String? units;
-
+  DateTime now = DateTime.now();
+  DateFormat formattedDate = DateFormat("HH:mm a");
+  String today = "";
+  late Timer _timer;
   //Fields
   late String? address = "";
 
   _HomeState(this._weather, this.address, this.units);
   @override
   void initState() {
+    today = formattedDate.format(now);
     super.initState();
+    _timer =
+        Timer.periodic(const Duration(milliseconds: 500), (timer) => _update());
   }
 
   @override
   void dispose() {
+    _timer.cancel();
     super.dispose();
+  }
+
+  void _update() {
+    setState(() {
+      today = formattedDate.format(now);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(builder: () {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Container(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  //Header
-                  header(),
-
-                  //2nd Line
-                  infoForCurrentWeather(),
-
-                  SizedBox(
-                    height: 20.h,
-                  ),
-                  //3rd line
-                  riseAndSet(),
-                  SizedBox(
-                    height: 20.h,
-                  ),
-
-                  moreInfo(),
-
-                  //forecast
-
-                  weekForecast(),
-                ],
-              ),
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
+    return ScreenUtilInit(
+        designSize: Size(_width, _height),
+        builder: (context, child) {
+          return Scaffold(
+              body: Container(
+            height: _height,
+            width: _width,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Expanded(
+                    flex: 3,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(flex: 1, child: header()),
+                          Expanded(flex: 4, child: infoForCurrentWeather()),
+                          Expanded(flex: 3, child: riseAndSet()),
+                        ],
+                      ),
+                    )),
+                Expanded(
+                    flex: 1,
+                    child: Container(
+                      child: moreInfo(),
+                    )),
+              ],
             ),
-          ),
-        ),
-      );
-    });
+          ));
+        });
   }
 
   //Header
   Widget header() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 100.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 40.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                //Area
-                Text(
-                  address.toString(),
-                  style: TextStyle(
-                      fontSize: 26.sp,
-                      color: Color.fromRGBO(0, 35, 102, 1),
-                      fontWeight: FontWeight.bold),
-                ),
-
-                //Degrees
-                Text(
-                  "${_weather.current.temp.toString()}°",
-                  style: TextStyle(
-                      fontSize: 45.sp, color: Color.fromRGBO(0, 35, 102, 1)),
-                ),
-
-                //Condition Pill
-                Chip(
-                  label: Text(
-                    _weather.current.weatherElement[0].description,
-                    style: TextStyle(
-                        fontSize: 20.sp, color: Color.fromRGBO(0, 35, 102, 1)),
-                  ),
-                  labelPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                )
-              ],
+    return Container(
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        //Location
+        Container(
+          child: Row(children: [
+            Icon(
+              FluentIcons.location_48_regular,
+              size: 30.sp,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 40.0),
-            child: Container(
-              child: Lottie.asset(
-                  weatherConditions.returnImage(
-                    _weather.current.weatherElement[0].description,
-                  ),
-                  frameRate: FrameRate(60),
-                  height: 150.h,
-                  width: 150.w),
+            SizedBox(
+              width: 10.w,
             ),
-          ),
-        ],
-      ),
+            Text(
+              address!.toString(),
+              style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w600),
+            )
+          ]),
+        ),
+
+        //Current Time
+        Container(
+          child: Row(children: [
+            Text(
+              "Today ",
+              style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w300),
+            ),
+            Text(
+              today,
+              style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w300),
+            ),
+          ]),
+        ),
+      ]),
     );
   }
 
   Widget infoForCurrentWeather() {
-    return Padding(
-      padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 30.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          //Humidity
-          Tooltip(
-            message: "Humidity",
-            child: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  //Icon
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5.0),
-                    child: Icon(
-                      WeatherIcons.raindrop,
-                      color: Color.fromRGBO(0, 35, 102, 1),
-                      size: 18.sp,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10.0,
-                  ),
-                  //Words
-                  Text(
-                    "${_weather.current.humidity}%",
-                    style: TextStyle(
-                        fontSize: 18.sp,
-                        color: Color.fromRGBO(0, 35, 102, 1),
-                        fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
+          //Temp & Feeling
+          Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "${_weather.current.temp.toStringAsFixed(0)}°",
+                  style:
+                      TextStyle(fontSize: 120.sp, fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  capitalizeAllWord(
+                      _weather.current.weatherElement[0].description),
+                  style:
+                      TextStyle(fontSize: 50.sp, fontWeight: FontWeight.w500),
+                ),
+              ],
             ),
           ),
-
-          //mBar
-          Tooltip(
-            message: "Pressure",
-            child: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  //Icon
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5.0),
-                    child: Icon(
-                      WeatherIcons.barometer,
-                      color: Color.fromRGBO(0, 35, 102, 1),
-                      size: 18.sp,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10.0,
-                  ),
-                  //Words
-                  Text(
-                    "${_weather.current.pressure} hPa",
-                    style: TextStyle(
-                        fontSize: 18.sp,
-                        color: Color.fromRGBO(0, 35, 102, 1),
-                        fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-            ),
+          SizedBox(
+            height: 20.h,
           ),
+          //Wind Pressure & Humid
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //pressure
+                Container(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        WeatherIcons.barometer,
+                        size: 26.sp,
+                      ),
+                      Text(
+                        _weather.current.pressure.toStringAsFixed(0),
+                        style: TextStyle(
+                            fontSize: 26.sp, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
 
-          //wind
-          Tooltip(
-            message: "Wind Speed",
-            child: Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  //Icon
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5.0),
-                    child: Icon(
-                      WeatherIcons.windy,
-                      color: Color.fromRGBO(0, 35, 102, 1),
-                      size: 18.sp,
-                    ),
+                //Humid
+                Container(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        WeatherIcons.raindrop,
+                        size: 26.sp,
+                      ),
+                      Text(
+                        _weather.current.humidity.toStringAsFixed(0),
+                        style: TextStyle(
+                            fontSize: 26.sp, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    width: 10.0,
+                ),
+
+                //wind speed
+
+                Container(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        WeatherIcons.windy,
+                        size: 26.sp,
+                      ),
+                      Text(
+                        _weather.current.windSpeed.toStringAsFixed(0),
+                        style: TextStyle(
+                            fontSize: 26.sp, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
-                  //Words
-                  Text(
-                    "${_weather.current.windSpeed} ${weatherConditions.returnMeasurement(units)}",
-                    style: TextStyle(
-                        fontSize: 18.sp,
-                        color: Color.fromRGBO(0, 35, 102, 1),
-                        fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
           ),
         ],
@@ -243,68 +232,26 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Widget riseAndSet() {
-    return Padding(
-      padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
-      child: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            //Rise
-            Tooltip(
-              message: "Sunrise",
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5.0),
-                    child: Icon(
-                      WeatherIcons.sunrise,
-                      color: Color.fromRGBO(0, 35, 102, 1),
-                      size: 18.sp,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 15.0,
-                  ),
-                  Text(
-                    "${weatherConditions.returndate(_weather.current.sunrise)}",
-                    style: TextStyle(
-                        fontSize: 18.sp,
-                        color: Color.fromRGBO(0, 35, 102, 1),
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+    return Container(
+      padding: const EdgeInsets.only(left: 35, right: 25, top: 20),
+      decoration: BoxDecoration(
+          color: Colors.black45, borderRadius: BorderRadius.circular(20)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Temperature",
+            style: TextStyle(fontSize: 34.sp, fontWeight: FontWeight.w600),
+          ),
+          SizedBox(
+            height: 30.h,
+          ),
+          Expanded(
+            child: TempChart(
+              dailyTemp: _weather.daily[0].temp,
             ),
-
-            //Set
-            Tooltip(
-              message: "Sunset",
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5.0),
-                    child: Icon(
-                      WeatherIcons.sunset,
-                      color: Color.fromRGBO(0, 35, 102, 1),
-                      size: 18.sp,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 15.0,
-                  ),
-                  Text(
-                    "${weatherConditions.returndate(_weather.current.sunset)}",
-                    style: TextStyle(
-                        fontSize: 18.sp,
-                        color: Color.fromRGBO(0, 35, 102, 1),
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -317,41 +264,64 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //Heading
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 20.0,
-              right: 20.0,
-            ),
-            child: Text(
-              "Next 48 Hours",
-              style: TextStyle(
-                  fontSize: 18.sp,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold),
+          Container(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Today",
+                  style: TextStyle(
+                      fontSize: 30.sp,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => NextSeven(
+                                  location: address!.toString(),
+                                  weather: _weather,
+                                )))),
+                    child: Text(
+                      "Next 7 Days",
+                      style: TextStyle(
+                          fontSize: 30.sp,
+                          color: Colors.grey,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ],
             ),
           ),
+          SizedBox(
+            height: 20.h,
+          ),
           //Info
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 120.h,
-            child: ListView.builder(
-              padding: EdgeInsets.all(20),
-              scrollDirection: Axis.horizontal,
-              shrinkWrap: false,
-              itemCount: _weather.hourly.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) {
-                  return Container();
-                } else {
-                  var time =
-                      weatherConditions.returndate(_weather.hourly[index].dt);
-                  var degree = "${_weather.hourly[index].temp}°";
+          Expanded(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: ListView.builder(
+                padding: EdgeInsets.only(left: 20, right: 20),
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: false,
+                itemCount: _weather.hourly.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Container();
+                  } else {
+                    var time =
+                        weatherConditions.returndate(_weather.hourly[index].dt);
+                    var degree =
+                        "${_weather.hourly[index].temp.toStringAsFixed(0)}°";
 
-                  var icon = weatherConditions.returnIcon(
-                      _weather.hourly[index].weatherElement[0].icon);
-                  return customMore(time, icon, degree);
-                }
-              },
+                    var icon = weatherConditions.returnIcon(
+                        _weather.hourly[index].weatherElement[0].icon);
+                    return customMore(time, icon, degree);
+                  }
+                },
+              ),
             ),
           ),
         ],
@@ -364,21 +334,20 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     return Padding(
       padding: const EdgeInsets.only(right: 20.0),
       child: Container(
-        height: 70.h,
-        width: 70.w,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             //Time
             Text(
               "$time",
               style: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 20.sp,
                   color: Color.fromRGBO(0, 35, 102, 1),
                   fontWeight: FontWeight.w600),
             ),
 
             SizedBox(
-              height: 15,
+              height: 15.h,
             ),
             //Icon
             FittedBox(
@@ -391,8 +360,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     heightFactor: 0.5,
                     child: Image.network(
                       icon,
-                      height: 40.h,
-                      width: 40.h,
+                      height: 80.h,
+                      width: 80.h,
                       fit: BoxFit.fill,
                     ),
                   ),
@@ -401,7 +370,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ),
 
             SizedBox(
-              height: 15,
+              height: 15.h,
             ),
             //Degree
             Text(
@@ -537,4 +506,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       ),
     );
   }
+}
+
+String capitalizeAllWord(String value) {
+  var result = value[0].toUpperCase();
+  for (int i = 1; i < value.length; i++) {
+    if (value[i - 1] == " ") {
+      result = result + value[i].toUpperCase();
+    } else {
+      result = result + value[i];
+    }
+  }
+  return result;
 }

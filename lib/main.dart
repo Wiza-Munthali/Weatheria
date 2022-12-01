@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,8 +7,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:weatheria/controllers/databaseHelper.dart';
 import 'package:weatheria/favourite.dart';
-import 'package:weatheria/models/favouriteModel.dart';
 import 'package:weatheria/models/preferences.dart';
+import 'package:weatheria/screens/map/map.dart';
 import 'package:weatheria/search.dart';
 import 'package:weatheria/settings.dart';
 
@@ -28,7 +28,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        fontFamily: "Sans Pro",
+        useMaterial3: true,
+        fontFamily: "Nunito",
         backgroundColor: Color.fromRGBO(250, 249, 246, 1),
       ),
       title: 'Weatheria',
@@ -66,8 +67,6 @@ class _MyHomePageState extends State<MyHomePage>
   late String? address;
   late String? longAddress;
 
-  late List<FavouriteModel> favouriteModel;
-
   WeatherController weatherController = new WeatherController();
   LocationController locationController = new LocationController();
   late Position currentPosition;
@@ -78,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     controller = TabController(length: tabItems.length, vsync: this);
     firstRun();
     _future = getFunction();
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(builder: () {
+    return ScreenUtilInit(builder: (context, child) {
       return Scaffold(
         body: FutureBuilder(
             future: _future,
@@ -102,8 +102,8 @@ class _MyHomePageState extends State<MyHomePage>
                       address: address.toString(),
                       units: units.toString(),
                     ),
+                    Map(),
                     Favourite(
-                      favouriteModel: favouriteModel,
                       units: units.toString(),
                     ),
                     Settings(
@@ -162,29 +162,20 @@ class _MyHomePageState extends State<MyHomePage>
   List<BottomNavigationBarItem> items = [
     //Home
     BottomNavigationBarItem(
-        icon: Image.asset(
-          "assets/images/icons/home.ico",
-          height: 30,
-          width: 30,
+        icon: Icon(
+          FluentIcons.home_48_regular,
+          color: Colors.black,
         ),
         label: "Home"),
 
     //Favourite
     BottomNavigationBarItem(
-        icon: Image.asset(
-          "assets/images/icons/heart.ico",
-          height: 30,
-          width: 30,
-        ),
+        icon: Icon(FluentIcons.heart_48_regular, color: Colors.black),
         label: "Favourite"),
 
     //Current Location
     BottomNavigationBarItem(
-        icon: Image.asset(
-          "assets/images/icons/settings.ico",
-          height: 30,
-          width: 30,
-        ),
+        icon: Icon(FluentIcons.settings_48_regular, color: Colors.black),
         label: "More"),
   ];
 
@@ -192,31 +183,25 @@ class _MyHomePageState extends State<MyHomePage>
     Padding(
       padding: const EdgeInsets.all(10.0),
       child: Tab(
-        icon: Image.asset(
-          "assets/images/icons/home.ico",
-          height: 30,
-          width: 30,
-        ),
+        icon: Icon(FluentIcons.home_48_regular, color: Colors.black),
       ),
     ),
     Padding(
       padding: const EdgeInsets.all(10.0),
       child: Tab(
-        icon: Image.asset(
-          "assets/images/icons/heart.ico",
-          height: 30,
-          width: 30,
-        ),
+        icon: Icon(FluentIcons.map_24_regular, color: Colors.black),
       ),
     ),
     Padding(
       padding: const EdgeInsets.all(10.0),
       child: Tab(
-        icon: Image.asset(
-          "assets/images/icons/settings.ico",
-          height: 30,
-          width: 30,
-        ),
+        icon: Icon(FluentIcons.heart_48_regular, color: Colors.black),
+      ),
+    ),
+    Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Tab(
+        icon: Icon(FluentIcons.settings_48_regular, color: Colors.black),
       ),
     ),
   ];
@@ -224,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   Widget bottom() {
     return BottomNavigationBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       selectedItemColor: Color.fromRGBO(0, 35, 102, 1),
       items: items,
       iconSize: 24.sp,
@@ -265,9 +250,8 @@ class _MyHomePageState extends State<MyHomePage>
       longAddress = "${place.locality}, ${place.country}";
       _weather = await weatherController.getOneCall(
           currentPosition.latitude, currentPosition.longitude, units);
-
+      print("weather: $_weather");
       //get favourites
-      favouriteModel = await DatabaseHelper.instance.getFavourite();
 
       return "done";
     } catch (e) {

@@ -47,7 +47,7 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(builder: () {
+    return ScreenUtilInit(builder: (context, child) {
       return SafeArea(
         child: Scaffold(
           backgroundColor: Colors.white,

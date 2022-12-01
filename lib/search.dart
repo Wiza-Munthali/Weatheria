@@ -12,7 +12,7 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(builder: () {
+    return ScreenUtilInit(builder: (context, child) {
       return Scaffold(
         backgroundColor: Color.fromARGB(255, 228, 228, 228),
         body: GestureDetector(

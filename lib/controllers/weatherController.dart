@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'package:weatheria/models/currentWeather.dart' as current;
 import 'package:weatheria/models/weather.dart';
 import 'package:http/http.dart' as http;
+import 'apiKey.dart';
 
 class WeatherController {
-  final String apiKey = "7ed8f61149bd0d5492a2afe397d915a4";
-
   Future getOneCall(lat, long, units) async {
     var client = http.Client();
     Uri uri = Uri.parse(
@@ -16,6 +15,7 @@ class WeatherController {
       var response = await client.get(uri);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
+        print("data: $data");
         _weather = Weather.fromJson(data);
         return _weather;
       }
