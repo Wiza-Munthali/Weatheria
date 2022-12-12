@@ -58,9 +58,19 @@ class WeatherConditions {
   returnMeasurement(unit) {
     switch (unit) {
       case "metric":
-        return "metre/sec";
+        return "m/s";
       case "imperial":
-        return "miles/hour";
+        return "mph";
+      default:
+    }
+  }
+
+  returnDegrees(unit) {
+    switch (unit) {
+      case "metric":
+        return "°C";
+      case "imperial":
+        return "°F";
       default:
     }
   }

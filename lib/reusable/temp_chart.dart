@@ -5,7 +5,10 @@ import 'package:weatheria/models/weather.dart';
 
 class TempChart extends StatefulWidget {
   final Temp dailyTemp;
-  const TempChart({super.key, required this.dailyTemp});
+  const TempChart({
+    super.key,
+    required this.dailyTemp,
+  });
 
   @override
   State<TempChart> createState() => _TempChartState(dailyTemp);
@@ -18,8 +21,8 @@ class _TempChartState extends State<TempChart> {
   DateFormat formattedDate = DateFormat("HH:mm a");
 
   List<Color> gradientColors = [
-    const Color(0xff23b6e6),
-    const Color(0xff02d39a),
+    const Color(0xff544151),
+    const Color(0xff544151),
   ];
 
   late List<FlSpot> _spots;
@@ -50,14 +53,17 @@ class _TempChartState extends State<TempChart> {
     );
   }
 
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
+  Widget bottomTitleWidgets(
+    double value,
+    TitleMeta meta,
+  ) {
     const style = TextStyle(
-      color: Color(0xff68737d),
+      color: Color(0xFF544151),
       fontWeight: FontWeight.w500,
       fontSize: 16,
     );
     const styleTwo = TextStyle(
-      color: Color(0xff68737d),
+      color: Color(0xFF544151),
       fontWeight: FontWeight.bold,
       fontSize: 16,
     );
@@ -110,7 +116,7 @@ class _TempChartState extends State<TempChart> {
   LineChartData mainData() {
     return LineChartData(
       gridData: FlGridData(
-          show: true, drawVerticalLine: false, drawHorizontalLine: false),
+          show: true, drawVerticalLine: true, drawHorizontalLine: false),
       titlesData: FlTitlesData(
         show: true,
         rightTitles: AxisTitles(

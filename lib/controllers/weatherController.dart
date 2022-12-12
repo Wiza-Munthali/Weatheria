@@ -15,7 +15,7 @@ class WeatherController {
       var response = await client.get(uri);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        print("data: $data");
+
         _weather = Weather.fromJson(data);
         return _weather;
       }

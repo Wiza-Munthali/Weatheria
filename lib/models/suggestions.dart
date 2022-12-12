@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart';
+import '../../controllers/apiKey.dart';
 
 class Place {
   String? city;
@@ -33,39 +34,42 @@ class Suggestion {
 class PlaceApiProvider {
   final client = Client();
 
-  PlaceApiProvider(this.sessionToken);
+  PlaceApiProvider();
 
-  final sessionToken;
-
-  static final String androidKey = 'AIzaSyCSJ4uIJTpmnlIEVKNrvQCTBAwMOj6giAM';
+  static final String androidKey = suggestionsAPIKey;
   static final String iosKey = 'YOUR_API_KEY_HERE';
   final apiKey = Platform.isAndroid ? androidKey : iosKey;
 
-  Future<List<Suggestion>> fetchSuggestions(String input, String lang) async {
-    Uri request = Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&sessiontoken=$sessionToken');
-    final response = await client.get(request);
+  Future<List<Suggestion>> fetchSuggestions(String input) async {
+    if (input.isNotEmpty) {
+      Uri request = Uri.parse(
+          'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey');
+      final response = await client.get(request);
 
-    if (response.statusCode == 200) {
-      final result = json.decode(response.body);
-      if (result['status'] == 'OK') {
-        // compose suggestions in a list
-        return result['predictions']
-            .map<Suggestion>((p) => Suggestion(p['place_id'], p['description']))
-            .toList();
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['status'] == 'OK') {
+          // compose suggestions in a list
+          return result['predictions']
+              .map<Suggestion>(
+                  (p) => Suggestion(p['place_id'], p['description']))
+              .toList();
+        }
+        if (result['status'] == 'ZERO_RESULTS') {
+          return [];
+        }
+        throw Exception(result['error_message']);
+      } else {
+        throw Exception('Failed to fetch suggestion');
       }
-      if (result['status'] == 'ZERO_RESULTS') {
-        return [];
-      }
-      throw Exception(result['error_message']);
-    } else {
-      throw Exception('Failed to fetch suggestion');
     }
+
+    throw Exception(['error_message']);
   }
 
   Future<Place> getPlaceDetailFromId(String placeId) async {
     Uri request = Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=address_component&key=$apiKey&sessiontoken=$sessionToken');
+        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=address_component&key=$apiKey');
     final response = await client.get(request);
 
     if (response.statusCode == 200) {

@@ -10,22 +10,22 @@ import 'package:weatheria/screens/next_seven.dart';
 import "package:flutter_iconly/flutter_iconly.dart";
 import "package:icofont_flutter/icofont_flutter.dart";
 
-class Home extends StatefulWidget {
+class FavoriteDetail extends StatefulWidget {
   final Weather weather;
   final String address;
   final String units;
-  const Home(
-      {Key? key,
+  const FavoriteDetail(
+      {super.key,
       required this.weather,
       required this.address,
-      required this.units})
-      : super(key: key);
+      required this.units});
 
   @override
-  _HomeState createState() => _HomeState(weather, address, units);
+  State<FavoriteDetail> createState() =>
+      _FavoriteDetailState(weather, address, units);
 }
 
-class _HomeState extends State<Home> with TickerProviderStateMixin {
+class _FavoriteDetailState extends State<FavoriteDetail> {
   WeatherConditions weatherConditions = new WeatherConditions();
   late Weather _weather;
   late String? units;
@@ -37,7 +37,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   //Fields
   late String? address = "";
 
-  _HomeState(this._weather, this.address, this.units);
+  _FavoriteDetailState(this._weather, this.address, this.units);
+
   @override
   void initState() {
     today = formattedDate.format(now);

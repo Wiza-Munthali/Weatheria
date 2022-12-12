@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:weatheria/models/suggestions.dart';
 
 class AddressSearch extends SearchDelegate<Suggestion> {
-  AddressSearch(this.sessionToken) {
-    apiClient = PlaceApiProvider(sessionToken);
+  AddressSearch() {
+    apiClient = PlaceApiProvider();
   }
-
-  final sessionToken;
   late PlaceApiProvider apiClient;
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -43,10 +41,7 @@ class AddressSearch extends SearchDelegate<Suggestion> {
   Widget buildSuggestions(BuildContext context) {
     return FutureBuilder(
       // We will put the api call here
-      future: query == ""
-          ? null
-          : apiClient.fetchSuggestions(
-              query, Localizations.localeOf(context).languageCode),
+      future: query == "" ? null : apiClient.fetchSuggestions(query),
       builder: (context, AsyncSnapshot snapshot) => query == ''
           ? Container(
               padding: EdgeInsets.all(16.0),

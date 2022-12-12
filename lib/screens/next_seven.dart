@@ -69,7 +69,7 @@ class _NextSevenState extends State<NextSeven> {
                   "Today",
                   style: TextStyle(
                       fontSize: 30.sp,
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.onBackground,
                       fontWeight: FontWeight.bold),
                 ),
               ],
@@ -98,7 +98,9 @@ class _NextSevenState extends State<NextSeven> {
                   if (index == 0) {
                     return Container(
                         decoration: BoxDecoration(
-                            color: Colors.blueAccent,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
                             borderRadius: BorderRadius.circular(10)),
                         child: customMore(time, icon, degree));
                   } else {
@@ -134,7 +136,7 @@ class _NextSevenState extends State<NextSeven> {
               "$time",
               style: TextStyle(
                   fontSize: 20.sp,
-                  color: Color.fromRGBO(0, 35, 102, 1),
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
                   fontWeight: FontWeight.w600),
             ),
 
@@ -169,7 +171,7 @@ class _NextSevenState extends State<NextSeven> {
               degrees,
               style: TextStyle(
                   fontSize: 24.sp,
-                  color: Color.fromRGBO(0, 35, 102, 1),
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
                   fontWeight: FontWeight.normal),
             )
           ],
@@ -216,19 +218,26 @@ class _NextSevenState extends State<NextSeven> {
               children: [
                 Text(
                   dayOfTheWeek,
-                  style:
-                      TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      fontSize: 28.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onBackground),
                 ),
                 Text(dateFormat.format(newDate),
                     style: TextStyle(
-                        fontSize: 24.sp, fontWeight: FontWeight.w400)),
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Theme.of(context).colorScheme.onBackground)),
               ],
             ),
           ),
           //Temp
           Expanded(
             child: Text("${daily.temp.max.toStringAsFixed(0)}°",
-                style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w600)),
+                style: TextStyle(
+                    fontSize: 30.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onBackground)),
           ),
 
           //Icon

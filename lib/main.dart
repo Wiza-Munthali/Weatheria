@@ -6,10 +6,9 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:weatheria/controllers/databaseHelper.dart';
-import 'package:weatheria/favourite.dart';
+import 'package:weatheria/screens/favorite/favourite.dart';
 import 'package:weatheria/models/preferences.dart';
 import 'package:weatheria/screens/map/map.dart';
-import 'package:weatheria/search.dart';
 import 'package:weatheria/settings.dart';
 
 import 'controllers/locationCotroller.dart';
@@ -17,8 +16,11 @@ import 'controllers/weatherController.dart';
 import 'home.dart';
 import 'models/weather.dart';
 
-void main() {
+late ObjectBox objectBox;
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  objectBox = await ObjectBox.create();
   runApp(MyApp());
 }
 
@@ -28,10 +30,73 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: "Nunito",
-        backgroundColor: Color.fromRGBO(250, 249, 246, 1),
-      ),
+          useMaterial3: true,
+          fontFamily: "Nunito",
+          colorScheme: ColorScheme(
+            brightness: Brightness.light,
+            primary: Color(0xFF894486),
+            onPrimary: Color(0xFFFFFFFF),
+            primaryContainer: Color(0xFFFFD7F6),
+            onPrimaryContainer: Color(0xFF380039),
+            secondary: Color(0xFF6D5869),
+            onSecondary: Color(0xFFFFFFFF),
+            secondaryContainer: Color(0xFFF7DAEF),
+            onSecondaryContainer: Color(0xFF261625),
+            tertiary: Color(0xFF9C413C),
+            onTertiary: Color(0xFFFFFFFF),
+            tertiaryContainer: Color(0xFFFFDAD6),
+            onTertiaryContainer: Color(0xFF410003),
+            error: Color(0xFFBA1A1A),
+            errorContainer: Color(0xFFFFDAD6),
+            onError: Color(0xFFFFFFFF),
+            onErrorContainer: Color(0xFF410002),
+            background: Color(0xFFFFFBFF),
+            onBackground: Color(0xFF1E1A1D),
+            surface: Color(0xFFFFFBFF),
+            onSurface: Color(0xFF1E1A1D),
+            surfaceVariant: Color(0xFFEEDEE7),
+            onSurfaceVariant: Color(0xFF4E444B),
+            outline: Color(0xFF7F747C),
+            onInverseSurface: Color(0xFFF8EEF2),
+            inverseSurface: Color(0xFF342F32),
+            inversePrimary: Color(0xFFFEABF5),
+            shadow: Color(0xFF000000),
+            surfaceTint: Color(0xFF894486),
+          )),
+      darkTheme: ThemeData(
+          useMaterial3: true,
+          fontFamily: "Nunito",
+          colorScheme: ColorScheme(
+            brightness: Brightness.dark,
+            primary: Color(0xFFFEABF5),
+            onPrimary: Color(0xFF541354),
+            primaryContainer: Color(0xFF6E2C6C),
+            onPrimaryContainer: Color(0xFFFFD7F6),
+            secondary: Color(0xFFDABFD3),
+            onSecondary: Color(0xFF3D2B3A),
+            secondaryContainer: Color(0xFF544151),
+            onSecondaryContainer: Color(0xFFF7DAEF),
+            tertiary: Color(0xFFFFB3AD),
+            onTertiary: Color(0xFF5F1413),
+            tertiaryContainer: Color(0xFF7E2A27),
+            onTertiaryContainer: Color(0xFFFFDAD6),
+            error: Color(0xFFFFB4AB),
+            errorContainer: Color(0xFF93000A),
+            onError: Color(0xFF690005),
+            onErrorContainer: Color(0xFFFFDAD6),
+            background: Color(0xFF1E1A1D),
+            onBackground: Color(0xFFE9E0E4),
+            surface: Color(0xFF1E1A1D),
+            onSurface: Color(0xFFE9E0E4),
+            surfaceVariant: Color(0xFF4E444B),
+            onSurfaceVariant: Color(0xFFD1C3CB),
+            outline: Color(0xFF9A8D95),
+            onInverseSurface: Color(0xFF1E1A1D),
+            inverseSurface: Color(0xFFE9E0E4),
+            inversePrimary: Color(0xFF894486),
+            shadow: Color(0xFF000000),
+            surfaceTint: Color(0xFFFEABF5),
+          )),
       title: 'Weatheria',
       debugShowCheckedModeBanner: false,
       home: MyHomePage(title: 'Home Page'),
@@ -74,6 +139,8 @@ class _MyHomePageState extends State<MyHomePage>
   UserPreferences userPreferences = new UserPreferences();
   late Future _future;
 
+  late BuildContext cxt;
+
   @override
   void initState() {
     super.initState();
@@ -89,6 +156,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
+    cxt = context;
     return ScreenUtilInit(builder: (context, child) {
       return Scaffold(
         body: FutureBuilder(
@@ -96,20 +164,22 @@ class _MyHomePageState extends State<MyHomePage>
             builder: (context, snapshot) {
               if (snapshot.data == "done") {
                 return TabBarView(
+                  physics: NeverScrollableScrollPhysics(),
                   children: [
                     Home(
                       weather: _weather,
                       address: address.toString(),
                       units: units.toString(),
                     ),
-                    Map(),
-                    Favourite(
-                      units: units.toString(),
-                    ),
-                    Settings(
-                      address: longAddress.toString(),
-                      units: units.toString(),
+                    Map(
+                      addressName: address.toString(),
                       weather: _weather,
+                      units: units.toString(),
+                      database: objectBox,
+                    ),
+                    FavoritePage(units: units.toString(), database: objectBox),
+                    Settings(
+                      units: units.toString(),
                     )
                   ],
                   controller: controller,
@@ -119,18 +189,11 @@ class _MyHomePageState extends State<MyHomePage>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      //icon
-                      Image.asset(
-                        "assets/images/icons/offline.ico",
-                        height: 64.h,
-                        width: 64.h,
-                      ),
-
                       //Text
                       Text(
                         "You are currently offline",
                         style: TextStyle(
-                            color: Color.fromRGBO(0, 35, 102, 1),
+                            color: Theme.of(context).colorScheme.onBackground,
                             fontSize: 26.sp,
                             fontWeight: FontWeight.w600),
                       )
@@ -147,7 +210,8 @@ class _MyHomePageState extends State<MyHomePage>
           elevation: 0,
           child: TabBar(
             indicatorWeight: 2,
-            indicatorColor: Color.fromRGBO(0, 35, 102, 1),
+            labelColor: Theme.of(context).colorScheme.onBackground,
+            indicatorColor: Theme.of(context).colorScheme.primary,
             indicatorPadding: EdgeInsets.zero,
             isScrollable: false,
             tabs: tabItems,
@@ -158,70 +222,33 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
-  //Navigation
-  List<BottomNavigationBarItem> items = [
-    //Home
-    BottomNavigationBarItem(
-        icon: Icon(
-          FluentIcons.home_48_regular,
-          color: Colors.black,
-        ),
-        label: "Home"),
-
-    //Favourite
-    BottomNavigationBarItem(
-        icon: Icon(FluentIcons.heart_48_regular, color: Colors.black),
-        label: "Favourite"),
-
-    //Current Location
-    BottomNavigationBarItem(
-        icon: Icon(FluentIcons.settings_48_regular, color: Colors.black),
-        label: "More"),
-  ];
-
   final tabItems = [
     Padding(
       padding: const EdgeInsets.all(10.0),
       child: Tab(
-        icon: Icon(FluentIcons.home_48_regular, color: Colors.black),
+        icon: Icon(FluentIcons.home_48_regular),
       ),
     ),
     Padding(
       padding: const EdgeInsets.all(10.0),
       child: Tab(
-        icon: Icon(FluentIcons.map_24_regular, color: Colors.black),
+        icon: Icon(FluentIcons.map_24_regular),
       ),
     ),
     Padding(
       padding: const EdgeInsets.all(10.0),
       child: Tab(
-        icon: Icon(FluentIcons.heart_48_regular, color: Colors.black),
+        icon: Icon(FluentIcons.heart_48_regular),
       ),
     ),
     Padding(
       padding: const EdgeInsets.all(10.0),
       child: Tab(
-        icon: Icon(FluentIcons.settings_48_regular, color: Colors.black),
+        icon: Icon(FluentIcons.settings_48_regular),
       ),
     ),
   ];
   //Widgets
-
-  Widget bottom() {
-    return BottomNavigationBar(
-      backgroundColor: Colors.black,
-      selectedItemColor: Color.fromRGBO(0, 35, 102, 1),
-      items: items,
-      iconSize: 24.sp,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      elevation: 0,
-      currentIndex: pageIndex,
-      onTap: (int i) => setState(() {
-        pageIndex = i;
-      }),
-    );
-  }
 
   Widget loading() {
     return Container(
@@ -240,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   Future getFunction() async {
     try {
-      units = await userPreferences.getUnits();
+      units = await userPreferences.getUnits() ?? "metric";
 
       currentPosition = await LocationController().determinePosition();
       List<Placemark> _address = await placemarkFromCoordinates(

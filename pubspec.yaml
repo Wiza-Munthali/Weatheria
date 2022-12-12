@@ -41,11 +41,16 @@ dependencies:
   fluentui_system_icons: ^1.1.186
   fl_chart: ^0.55.2
   flutter_launcher_icons:
-
+  flutter_iconly: ^1.0.2
+  icofont_flutter: ^1.4.0
+  custom_marker: ^1.0.0
+  after_layout: ^1.2.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  latlong2: ^0.8.1
+  google_maps_flutter: ^2.2.1
 
 dev_dependencies:
   flutter_test:
@@ -74,7 +79,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/weather_icons/
-    - assets/images/icons/
+    - assets/maps/theme.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

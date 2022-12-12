@@ -1,7 +1,8 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.weatheria">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.wiza.weatheria">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="Weatheria"
         android:icon="@mipmap/ic_launcher">
@@ -30,6 +31,8 @@
               android:name="io.flutter.embedding.android.SplashScreenDrawable"
               android:resource="@drawable/launch_background"
               />
+
+            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -40,5 +43,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+              android:name="com.google.android.geo.API_KEY"
+              android:value="AIzaSyAOrp0r7eHoUDidRcDhRRlZ7NjqiNBxY7Q"
+              />
     </application>
 </manifest>
